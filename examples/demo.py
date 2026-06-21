@@ -44,14 +44,14 @@ def main() -> None:
     # ---------------------------------------------------------------
     print("\n[2] Spawning child agents …")
 
-    child_medical = mother.spawn_child(
+    child_science = mother.spawn_child(
         AgentConfig(
-            agent_id="child-medical",
-            domain="medical",
+            agent_id="child-science",
+            domain="science",
             task="question_answering",
             adapter_type="prompt",
             adapter_params={
-                "system_prefix": "[医疗助手 / Medical Assistant] Domain: $domain\n",
+                "system_prefix": "[科学助手 / Science Assistant] Domain: $domain\n",
             },
         )
     )
@@ -78,7 +78,7 @@ def main() -> None:
         )
     )
 
-    print(f"    {child_medical}")
+    print(f"    {child_science}")
     print(f"    {child_finance}")
     print(f"    {child_planning}")
     print(f"    Mother's children: {list(mother.children.keys())}")
@@ -88,12 +88,12 @@ def main() -> None:
     # ---------------------------------------------------------------
     print("\n[3] Running inference …")
 
-    q_medical = "What are the symptoms of hypertension?"
+    q_science = "How does photosynthesis work in plants?"
     q_finance = "Explain the impact of interest rate hikes on bond prices."
     q_plan = "Buy groceries, then cook dinner, then watch a movie"
 
-    print(f"\n  Medical child — Q: {q_medical!r}")
-    r = child_medical.run(q_medical)
+    print(f"\n  Science child — Q: {q_science!r}")
+    r = child_science.run(q_science)
     print(f"  → {r.text}")
 
     print(f"\n  Finance child — Q: {q_finance!r}")
@@ -106,7 +106,7 @@ def main() -> None:
 
     # Shared tool available to all children
     print(f"\n  Word count tool — shared with all children")
-    r_tool = child_medical.run(q_medical, skill_name="tool_calling",
+    r_tool = child_science.run(q_science, skill_name="tool_calling",
                                context={"tool": "word_count"})
     print(f"  → word count = {r_tool.output}")
 
@@ -138,7 +138,7 @@ def main() -> None:
     ]
 
     # Benchmark all agents (mother + children that support the tasks)
-    reports = evaluator.compare([mother, child_medical, child_finance], tasks)
+    reports = evaluator.compare([mother, child_science, child_finance], tasks)
     print()
     for agent_id, report in reports.items():
         print(f"  {report.summary()}")

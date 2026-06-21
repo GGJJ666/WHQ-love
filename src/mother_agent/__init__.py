@@ -22,7 +22,7 @@ Quick-start
         task="question_answering",
         adapter_type="prompt",
         adapter_params={
-            "system_prefix": "You are a medical assistant.\\n",
+            "system_prefix": "You are a medical assistant.\n",
         },
     )
     child = mother.spawn_child(child_config)
