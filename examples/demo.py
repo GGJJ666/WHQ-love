@@ -106,8 +106,9 @@ def main() -> None:
 
     # Shared tool available to all children
     print(f"\n  Word count tool — shared with all children")
-    r_tool = child_science.run(q_science, skill_name="tool_calling",
-                               context={"tool": "word_count"})
+    r_tool = child_science.run(
+        q_science, skill_name="tool_calling", context={"tool": "word_count"}
+    )
     print(f"  → word count = {r_tool.output}")
 
     # ---------------------------------------------------------------

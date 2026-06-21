@@ -11,7 +11,7 @@ ToolHandler = Callable[[str, dict[str, Any]], Any]
 
 
 class ToolSkill(BaseSkill):
-    """Maintains a registry of named tools and dispatches calls to them.
+    r"""Maintains a registry of named tools and dispatches calls to them.
 
     Tools are plain Python callables registered via :meth:`register_tool`.
     Each callable receives ``(prompt, context)`` and returns any JSON-
@@ -25,7 +25,7 @@ class ToolSkill(BaseSkill):
         def calculator(prompt, context):
             # naive eval — do NOT use in production!
             import re
-            expr = re.search(r"[\\d+\\-*/().\\s]+", prompt)
+            expr = re.search(r"[\d+\-*/().\s]+", prompt)
             return eval(expr.group()) if expr else None
 
         result = tool_skill.execute("What is 2 + 3?", {"tool": "calculator"})

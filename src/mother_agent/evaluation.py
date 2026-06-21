@@ -10,6 +10,9 @@ from typing import Any, Callable
 from .backbone.base_backbone import BackboneOutput
 from .skills.base_skill import SkillResult
 
+# Small value added to denominators to prevent division by zero.
+_EPSILON: float = 1e-9
+
 
 # ---------------------------------------------------------------------------
 # Data containers
@@ -257,7 +260,7 @@ def cross_task_interference(
         if task in mixed_scores:
             baseline = baseline_scores[task]
             mixed = mixed_scores[task]
-            result[task] = (baseline - mixed) / (baseline + 1e-9)
+            result[task] = (baseline - mixed) / (baseline + _EPSILON)
     return result
 
 
@@ -291,8 +294,8 @@ def knowledge_isolation_score(
     mean_b = statistics.mean(b_vals)
 
     cov = statistics.mean((a - mean_a) * (b - mean_b) for a, b in zip(a_vals, b_vals))
-    std_a = statistics.pstdev(a_vals) or 1e-9
-    std_b = statistics.pstdev(b_vals) or 1e-9
+    std_a = statistics.pstdev(a_vals) or _EPSILON
+    std_b = statistics.pstdev(b_vals) or _EPSILON
     correlation = cov / (std_a * std_b)
 
     # Map correlation ∈ [-1, 1] to isolation ∈ [0, 1]

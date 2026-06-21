@@ -29,7 +29,7 @@ Quick-start
 
     # 3. Run inference
     result = child.run("What are the symptoms of hypertension?")
-    print(result.text)
+    print(result.text)  # result is a BackboneOutput instance
 """
 
 from .backbone import BaseBackbone, BackboneOutput, MockBackbone

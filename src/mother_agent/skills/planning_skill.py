@@ -33,7 +33,7 @@ class PlanningSkill(BaseSkill):
         steps = [s.strip().capitalize() for s in raw_steps if s.strip()][:max_steps]
 
         if not steps:
-            steps = [f"Analyse the goal: {prompt[:60]}", "Execute the primary task", "Verify results"]
+            steps = [f"Analyze the goal: {prompt[:60]}", "Execute the primary task", "Verify results"]
 
         numbered = "\n".join(f"{i+1}. {step}" for i, step in enumerate(steps))
         output = f"Plan ({len(steps)} steps):\n{numbered}"
