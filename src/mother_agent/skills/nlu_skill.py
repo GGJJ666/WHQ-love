@@ -50,17 +50,22 @@ class NLUSkill(BaseSkill):
 
         # Naive entity extraction: capitalised tokens that are not sentence-start words
         entities: list[str] = []
+        seen_entities: set[str] = set()
         for term, _ in product_term_matches:
-            if term not in entities:
-                entities.append(term)
+            if term in seen_entities:
+                continue
+            entities.append(term)
+            seen_entities.add(term)
         for match in re.finditer(r"\b[A-Z][a-z]+\b", prompt):
             if any(self._spans_overlap(match.span(), span) for span in product_spans):
                 continue
             token = match.group(0)
             if token in {"I", "The", "A", "An", "This", "That"}:
                 continue
-            if token not in entities:
-                entities.append(token)
+            if token in seen_entities:
+                continue
+            entities.append(token)
+            seen_entities.add(token)
 
         output = f"Intent: {intent} | Entities: {entities}"
         return SkillResult(
@@ -89,11 +94,14 @@ class NLUSkill(BaseSkill):
         return sorted(matches, key=lambda item: item[1][0])
 
     def _get_product_terms(self, context: dict[str, Any]) -> list[str]:
+        """Return product terms with explicit-call context taking precedence.
+
+        Direct ``product_terms`` in the call context override any
+        ``agent_metadata["product_terms"]`` injected by the agent runtime.
+        """
         terms = context.get("product_terms")
         if terms is None:
             terms = context.get("agent_metadata", {}).get("product_terms")
-        if terms is None:
-            terms = context.get("metadata", {}).get("product_terms")
         if isinstance(terms, str):
             terms = [terms]
         if not isinstance(terms, list):
