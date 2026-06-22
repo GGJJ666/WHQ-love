@@ -159,6 +159,14 @@ class TestChildAgent:
         result = child.run("Plan a trip to Tokyo", skill_name="planning")
         assert isinstance(result, SkillResult)
 
+    def test_run_with_skill_includes_metadata_in_context(self):
+        child = self._spawn(
+            agent_id="product-child",
+            metadata={"product_terms": ["WHQ Love"]},
+        )
+        result = child.run("Explain whq love pricing", skill_name="nlu")
+        assert "WHQ Love" in result.data["entities"]
+
     def test_skill_restriction(self):
         child = self._spawn(
             agent_id="restricted-child",

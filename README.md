@@ -116,6 +116,7 @@ examples/
 - 通过 **PromptAdapter**（零参数开销）或 **LoRAAdapter**（小规模 delta 权重）定制行为。
 - 可通过 `enabled_skills` 限制可用技能，实现权限隔离。
 - 提供 `get_checkpoint()` 序列化轻量状态（仅适配器 + 配置）。
+- 可在 `metadata["product_terms"]` 中声明产品专有术语，供 `nlu` 技能做大小写无关的术语识别。
 
 ### 适配器 / Adapters
 

@@ -38,6 +38,13 @@ class TestNLUSkill:
         result = self.skill.execute("Search for Paris weather")
         assert "Paris" in result.data["entities"]
 
+    def test_extracts_product_specific_terms_from_context(self):
+        result = self.skill.execute(
+            "create a report for whq love and lovegraph",
+            context={"product_terms": ["WHQ Love", "LoveGraph"]},
+        )
+        assert result.data["entities"] == ["WHQ Love", "LoveGraph"]
+
     def test_repr(self):
         assert "NLUSkill" in repr(self.skill)
 

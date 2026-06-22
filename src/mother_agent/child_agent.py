@@ -131,7 +131,11 @@ class ChildAgent:
         """
         if skill_name is not None:
             skill = self.get_skill(skill_name)
-            return skill.execute(prompt, context)
+            skill_context = {
+                "agent_metadata": dict(self.config.metadata),
+                **(context or {}),
+            }
+            return skill.execute(prompt, skill_context)
 
         adapted_prompt = (
             self._adapter.adapt_prompt(prompt, context)

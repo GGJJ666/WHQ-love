@@ -44,9 +44,20 @@ class NLUSkill(BaseSkill):
                 intent = label
                 break
 
+        context = context or {}
+        product_term_matches = self._extract_product_terms(prompt, context)
+        product_spans = [span for _, span in product_term_matches]
+
         # Naive entity extraction: capitalised tokens that are not sentence-start words
-        tokens = re.findall(r"\b[A-Z][a-z]+\b", prompt)
-        entities = list({t for t in tokens if t not in {"I", "The", "A", "An", "This", "That"}})
+        entities: list[str] = [term for term, _ in product_term_matches]
+        for match in re.finditer(r"\b[A-Z][a-z]+\b", prompt):
+            if any(self._spans_overlap(match.span(), span) for span in product_spans):
+                continue
+            token = match.group(0)
+            if token in {"I", "The", "A", "An", "This", "That"}:
+                continue
+            if token not in entities:
+                entities.append(token)
 
         output = f"Intent: {intent} | Entities: {entities}"
         return SkillResult(
@@ -54,3 +65,38 @@ class NLUSkill(BaseSkill):
             output=output,
             data={"intent": intent, "entities": entities},
         )
+
+    def _extract_product_terms(
+        self,
+        prompt: str,
+        context: dict[str, Any],
+    ) -> list[tuple[str, tuple[int, int]]]:
+        terms = self._get_product_terms(context)
+        matches: list[tuple[str, tuple[int, int]]] = []
+        matched_spans: list[tuple[int, int]] = []
+
+        for term in sorted(terms, key=len, reverse=True):
+            pattern = re.compile(rf"(?<!\w){re.escape(term)}(?!\w)", re.IGNORECASE)
+            match = pattern.search(prompt)
+            if match is None or any(self._spans_overlap(match.span(), span) for span in matched_spans):
+                continue
+            matched_spans.append(match.span())
+            matches.append((term, match.span()))
+
+        return sorted(matches, key=lambda item: item[1][0])
+
+    def _get_product_terms(self, context: dict[str, Any]) -> list[str]:
+        terms = context.get("product_terms")
+        if terms is None:
+            terms = context.get("agent_metadata", {}).get("product_terms")
+        if terms is None:
+            terms = context.get("metadata", {}).get("product_terms")
+        if isinstance(terms, str):
+            terms = [terms]
+        if not isinstance(terms, list):
+            return []
+        return [term.strip() for term in terms if isinstance(term, str) and term.strip()]
+
+    @staticmethod
+    def _spans_overlap(left: tuple[int, int], right: tuple[int, int]) -> bool:
+        return left[0] < right[1] and right[0] < left[1]
