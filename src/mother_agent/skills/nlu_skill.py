@@ -77,11 +77,12 @@ class NLUSkill(BaseSkill):
 
         for term in sorted(terms, key=len, reverse=True):
             pattern = re.compile(rf"(?<!\w){re.escape(term)}(?!\w)", re.IGNORECASE)
-            match = pattern.search(prompt)
-            if match is None or any(self._spans_overlap(match.span(), span) for span in matched_spans):
-                continue
-            matched_spans.append(match.span())
-            matches.append((term, match.span()))
+            for match in pattern.finditer(prompt):
+                if any(self._spans_overlap(match.span(), span) for span in matched_spans):
+                    continue
+                matched_spans.append(match.span())
+                matches.append((term, match.span()))
+                break
 
         return sorted(matches, key=lambda item: item[1][0])
 

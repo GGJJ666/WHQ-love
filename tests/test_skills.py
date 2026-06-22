@@ -45,6 +45,13 @@ class TestNLUSkill:
         )
         assert result.data["entities"] == ["WHQ Love", "LoveGraph"]
 
+    def test_product_terms_can_match_later_non_overlapping_occurrence(self):
+        result = self.skill.execute(
+            "compare whq love with love",
+            context={"product_terms": ["Love", "WHQ Love"]},
+        )
+        assert result.data["entities"] == ["WHQ Love", "Love"]
+
     def test_repr(self):
         assert "NLUSkill" in repr(self.skill)
 
