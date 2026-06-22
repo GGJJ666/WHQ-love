@@ -50,22 +50,22 @@ class NLUSkill(BaseSkill):
 
         # Naive entity extraction: capitalised tokens that are not sentence-start words
         entities: list[str] = []
-        seen_entities: set[str] = set()
+        extracted_entity_names: set[str] = set()
         for term, _ in product_term_matches:
-            if term in seen_entities:
+            if term in extracted_entity_names:
                 continue
             entities.append(term)
-            seen_entities.add(term)
+            extracted_entity_names.add(term)
         for match in re.finditer(r"\b[A-Z][a-z]+\b", prompt):
             if any(self._spans_overlap(match.span(), span) for span in product_spans):
                 continue
             token = match.group(0)
             if token in {"I", "The", "A", "An", "This", "That"}:
                 continue
-            if token in seen_entities:
+            if token in extracted_entity_names:
                 continue
             entities.append(token)
-            seen_entities.add(token)
+            extracted_entity_names.add(token)
 
         output = f"Intent: {intent} | Entities: {entities}"
         return SkillResult(
@@ -102,6 +102,12 @@ class NLUSkill(BaseSkill):
 
         Direct ``product_terms`` in the call context override any
         ``agent_metadata["product_terms"]`` injected by the agent runtime.
+
+        Args:
+            context: Skill execution context that may carry product terms.
+
+        Returns:
+            A normalised list of configured product terms.
         """
         terms = context.get("product_terms")
         if terms is None:
