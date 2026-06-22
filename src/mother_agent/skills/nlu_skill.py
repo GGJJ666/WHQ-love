@@ -48,7 +48,8 @@ class NLUSkill(BaseSkill):
         product_term_matches = self._extract_product_terms(prompt, context)
         product_spans = [span for _, span in product_term_matches]
 
-        # Naive entity extraction: capitalised tokens that are not sentence-start words
+        # Entity extraction: configured product terms first, then remaining
+        # capitalised tokens that do not overlap a matched product term.
         entities: list[str] = []
         extracted_entity_names: set[str] = set()
         for term, _ in product_term_matches:
@@ -112,9 +113,11 @@ class NLUSkill(BaseSkill):
         terms = context.get("product_terms")
         if terms is None:
             terms = context.get("agent_metadata", {}).get("product_terms")
+        if terms is None:
+            return []
         if isinstance(terms, str):
             terms = [terms]
-        if not isinstance(terms, list):
+        elif not isinstance(terms, list):
             return []
         return [term.strip() for term in terms if isinstance(term, str) and term.strip()]
 
