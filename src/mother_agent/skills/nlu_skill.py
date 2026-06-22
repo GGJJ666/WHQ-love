@@ -83,12 +83,16 @@ class NLUSkill(BaseSkill):
         matches: list[tuple[str, tuple[int, int]]] = []
         matched_spans: list[tuple[int, int]] = []
 
+        # Match longer terms first so a shorter name like "Love" does not
+        # consume part of a larger product name such as "WHQ Love".
         for term in sorted(terms, key=len, reverse=True):
             pattern = re.compile(rf"(?<!\w){re.escape(term)}(?!\w)", re.IGNORECASE)
             for match in pattern.finditer(prompt):
                 if any(self._spans_overlap(match.span(), span) for span in matched_spans):
                     continue
                 matched_spans.append(match.span())
+                # Keep the configured canonical spelling in extracted entities
+                # even when the prompt uses different casing.
                 matches.append((term, match.span()))
 
         return sorted(matches, key=lambda item: item[1][0])
