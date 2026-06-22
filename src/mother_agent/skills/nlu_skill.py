@@ -49,7 +49,10 @@ class NLUSkill(BaseSkill):
         product_spans = [span for _, span in product_term_matches]
 
         # Naive entity extraction: capitalised tokens that are not sentence-start words
-        entities: list[str] = [term for term, _ in product_term_matches]
+        entities: list[str] = []
+        for term, _ in product_term_matches:
+            if term not in entities:
+                entities.append(term)
         for match in re.finditer(r"\b[A-Z][a-z]+\b", prompt):
             if any(self._spans_overlap(match.span(), span) for span in product_spans):
                 continue
@@ -82,7 +85,6 @@ class NLUSkill(BaseSkill):
                     continue
                 matched_spans.append(match.span())
                 matches.append((term, match.span()))
-                break
 
         return sorted(matches, key=lambda item: item[1][0])
 
